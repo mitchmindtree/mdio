@@ -1,0 +1,23 @@
+[package]
+name = "mdio"
+version = "0.1.0"
+authors = ["mitchmindtree <mail@mitchellnordine.com>"]
+description = "An implementation of Management Data Input/Output."
+keywords = ["ethernet", "phy", "smi", "miim", "rmii"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/mitchmindtree/mdio.git"
+homepage = "https://github.com/mitchmindtree/mdio"
+edition = "2018"
+
+[dependencies]
+bitvec = { version = "0.20.0", default-features = false }
+embedded-hal = { version = "0.2.4", features = ["unproven"], optional = true }
+hash32 = { version = "0.1.1", optional = true }
+hash32-derive = { version = "0.1", optional = true }
+nb = { version = "1", optional = true }
+serde = { version = "1", default-features = false, features = ["derive"], optional = true }
+ufmt = { version = "0.1", optional = true }
+
+[features]
+bitbang = ["embedded-hal", "nb"]
