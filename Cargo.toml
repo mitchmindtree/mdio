@@ -1,6 +1,6 @@
 [package]
 name = "mdio"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["mitchmindtree <mail@mitchellnordine.com>"]
 description = "An implementation of Management Data Input/Output."
 keywords = ["ethernet", "phy", "smi", "miim", "rmii"]
