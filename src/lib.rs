@@ -78,3 +78,23 @@ pub trait Write {
     /// See the `miim::Write` trait.
     fn write(&mut self, ctrl_bits: u16, data_bits: u16) -> Result<(), Self::Error>;
 }
+
+impl<'a, T> Read for &'a mut T
+where
+    T: Read,
+{
+    type Error = T::Error;
+    fn read(&mut self, ctrl_bits: u16) -> Result<u16, Self::Error> {
+        (**self).read(ctrl_bits)
+    }
+}
+
+impl<'a, T> Write for &'a mut T
+where
+    T: Write,
+{
+    type Error = T::Error;
+    fn write(&mut self, ctrl_bits: u16, data_bits: u16) -> Result<(), Self::Error> {
+        (**self).write(ctrl_bits, data_bits)
+    }
+}
