@@ -26,7 +26,12 @@
 //! that allows for both using the integrated MAC while *also* supporting customised protocols.
 //! This is because some MCUs provide limited MAC interfaces that only support the standard MIIM
 //! protocol. In these cases, while not ideal, the traits can be implemented for "bit-banging"
-//! interfaces instead.
+//! interfaces instead. This crate provides one such interface via the `bitbang` feature.
+//!
+//! ## Features
+//!
+//! - `bitbang`: Enables the `bb` module along with an `bb::Mdio` type providing a bit-banged
+//!   implementation of the `mdio::Read` and `mdio::Write` traits.
 
 #[cfg(feature = "bitbang")]
 pub mod bb;

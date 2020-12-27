@@ -1,10 +1,12 @@
 //! MII Management (MIIM) Interface.
 //!
-//! The IEEE 802.3 MII Management Interface, also known as the Management Data Input/Output
-//! (MDIO) Interface. Allows for upper-layer devices to monitor and control the states of the
-//! switch.
+//! The IEEE 802.3 MII Management Interface. Allows for upper-layer devices to monitor and control
+//! the state of one or more PHYs.
 //!
 //! Each of the 8 16-bit registers are indexed via a 5-bit address, preceded by a 5-bit PHY address.
+//!
+//! A blanket implementation of the `mdio::miim::{Read, Write}` traits is provided for types
+//! implementing the `mdio::{Read, Write}` traits.
 
 /// A trait for reading the standard MIIM protocol.
 ///

@@ -1,30 +1,55 @@
+//! A bit-banged implementation of the MDIO traits.
+
 use crate::{Read, Write};
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 use embedded_hal::timer::{CountDown, Periodic};
 use nb::block;
 
 /// A type providing a "bit-banged" MDIO implementation around two given GPIO pins.
-pub struct MdioBb<Mdio, Mdc, Clk> {
+///
+/// ## Read
+///
+/// The `mdio::Read` implementation works as follows:
+///
+/// - Writes the 32-bit preamble.
+/// - Writes the 14 most significant bits of the given `ctrl_bits` in MSB order.
+/// - Waits for 2 bit times for the turn around.
+/// - Reads the 16-bit data using `u16::from_be_bytes`.
+///
+/// ## Write
+///
+/// The `mdio::Write` implementation works as follows:
+///
+/// - Writes the 32-bit preamble.
+/// - Writes the 16-bit ctrl value in MSB order.
+/// - Writes the 16-bit data in MSB order.
+pub struct Mdio<MdioPin, MdcPin, Clk> {
     /// The data pin.
-    mdio: Mdio,
+    mdio: MdioPin,
     /// The clock pin.
-    mdc: Mdc,
+    mdc: MdcPin,
     /// The clock used to time bangs.
     clk: Clk,
 }
 
-impl<Mdio, Mdc, Clk, E> MdioBb<Mdio, Mdc, Clk>
+impl<MdioPin, MdcPin, Clk, E> Mdio<MdioPin, MdcPin, Clk>
 where
-    Mdc: OutputPin<Error = E>,
-    Mdio: InputPin<Error = E> + OutputPin<Error = E>,
+    MdcPin: OutputPin<Error = E>,
+    MdioPin: InputPin<Error = E> + OutputPin<Error = E>,
     Clk: CountDown + Periodic,
 {
     /// The duration of the preamble in bits.
     const PREAMBLE_BITS: usize = 32;
 
     /// Create the bit-banged MDIO instance.
-    pub fn new(mdio: Mdio, mdc: Mdc, clk: Clk) -> Self {
+    pub fn new(mdio: MdioPin, mdc: MdcPin, clk: Clk) -> Self {
         Self { mdio, mdc, clk }
+    }
+
+    /// Split the MDIO bit-banged implementation into its parts.
+    pub fn into_parts(self) -> (MdioPin, MdcPin, Clk) {
+        let Self { mdio, mdc, clk } = self;
+        (mdio, mdc, clk)
     }
 
     fn wait_for_clk(&mut self) {
@@ -110,10 +135,10 @@ where
     }
 }
 
-impl<Mdio, Mdc, Clk, E> Read for MdioBb<Mdio, Mdc, Clk>
+impl<MdioPin, MdcPin, Clk, E> Read for Mdio<MdioPin, MdcPin, Clk>
 where
-    Mdc: OutputPin<Error = E>,
-    Mdio: InputPin<Error = E> + OutputPin<Error = E>,
+    MdcPin: OutputPin<Error = E>,
+    MdioPin: InputPin<Error = E> + OutputPin<Error = E>,
     Clk: CountDown + Periodic,
 {
     type Error = E;
@@ -127,10 +152,10 @@ where
     }
 }
 
-impl<Mdio, Mdc, Clk, E> Write for MdioBb<Mdio, Mdc, Clk>
+impl<MdioPin, MdcPin, Clk, E> Write for Mdio<MdioPin, MdcPin, Clk>
 where
-    Mdc: OutputPin<Error = E>,
-    Mdio: InputPin<Error = E> + OutputPin<Error = E>,
+    MdcPin: OutputPin<Error = E>,
+    MdioPin: InputPin<Error = E> + OutputPin<Error = E>,
     Clk: CountDown + Periodic,
 {
     type Error = E;
