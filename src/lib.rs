@@ -33,6 +33,8 @@
 //! - `bitbang`: Enables the `bb` module along with an `bb::Mdio` type providing a bit-banged
 //!   implementation of the `mdio::Read` and `mdio::Write` traits.
 
+#![no_std]
+
 #[cfg(feature = "bitbang")]
 pub mod bb;
 pub mod miim;
