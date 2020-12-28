@@ -7,7 +7,7 @@ use nb::block;
 
 /// A type providing a "bit-banged" MDIO implementation around two given GPIO pins.
 ///
-/// ## Read
+/// ### Read
 ///
 /// The `mdio::Read` implementation works as follows:
 ///
@@ -16,13 +16,42 @@ use nb::block;
 /// - Waits for 2 bit times for the turn around.
 /// - Reads the 16-bit data using `u16::from_be_bytes`.
 ///
-/// ## Write
+/// ### Write
 ///
 /// The `mdio::Write` implementation works as follows:
 ///
 /// - Writes the 32-bit preamble.
 /// - Writes the 16-bit ctrl value in MSB order.
 /// - Writes the 16-bit data in MSB order.
+///
+/// ## Example
+///
+/// Here's a rough example of what creating a bit-banged MDIO interface looks like. This code was
+/// taken from an application using an STM32F107 MCU to bit-bang a KSZ8863RLL switch.
+///
+/// ```ignore
+/// let mut rcc = device.RCC.constrain();
+/// let clocks = rcc.cfgr.sysclk(CYCLE_HZ.hz()).freeze();
+/// let mut gpioa = device.GPIOA.split(&mut rcc.apb2);
+/// let mut gpioc = device.GPIOC.split(&mut rcc.apb2);
+/// let mdio = gpioa.pa2.into_open_drain_output(&mut gpioa.crl);
+/// let mdc = gpioc.pc1.into_push_pull_output(&mut gpioc.crl);
+/// let timer = hal::timer::Timer::tim3(device.TIM3, &clocks, &mut rcc.apb1).start_count_down(2_500.khz());
+/// let mut mdio = mdio::bb::Mdio::new(mdio, mdc, timer);
+/// ```
+///
+/// *Note: The timer used here is 2.5 Mhz. This value was specified in the datasheet for the
+/// Ethernet switch. Be sure to change this to suit your application.*
+///
+/// Now we can read or write using either the `mdio::{Read, Write}` or `mdio::miim::{Read, Write}`
+/// traits.
+///
+/// ```ignore
+/// use mdio::miim::{Read, Write};
+///
+/// let data = mdio.read(phy_addr, reg_addr);
+/// mdio.write(phy_addr, reg_addr, data);
+/// ```
 pub struct Mdio<MdioPin, MdcPin, Clk> {
     /// The data pin.
     mdio: MdioPin,
