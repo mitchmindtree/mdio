@@ -34,7 +34,9 @@ where
 {
     type Error = T::Error;
     fn read(&mut self, phy_addr: u8, reg_addr: u8) -> Result<u16, Self::Error> {
-        crate::Read::read(self, read_ctrl_bits(phy_addr, reg_addr))
+        let ctrl_bits = read_ctrl_bits(phy_addr, reg_addr);
+        let data_bits = crate::Read::read(self, ctrl_bits)?;
+        Ok(data_bits)
     }
 }
 
@@ -44,7 +46,8 @@ where
 {
     type Error = T::Error;
     fn write(&mut self, phy_addr: u8, reg_addr: u8, data: u16) -> Result<(), Self::Error> {
-        crate::Write::write(self, write_ctrl_bits(phy_addr, reg_addr), data)
+        let ctrl_bits = write_ctrl_bits(phy_addr, reg_addr);
+        crate::Write::write(self, ctrl_bits, data)
     }
 }
 
