@@ -53,21 +53,35 @@ where
 
 fn phy_addr_ctrl_bits(phy_addr: u8) -> u16 {
     const PHY_ADDR_OFFSET: u16 = 7;
-    ((phy_addr & 0b00011111) as u16) << PHY_ADDR_OFFSET
+    const PHY_ADDR_MAX: u8 = 0b00011111;
+    assert!(
+        phy_addr <= PHY_ADDR_MAX,
+        "clause 22 MIIM has a maximum phy address value of {:#010b}",
+        PHY_ADDR_MAX
+    );
+    ((phy_addr & PHY_ADDR_MAX) as u16) << PHY_ADDR_OFFSET
 }
 
 fn reg_addr_ctrl_bits(reg_addr: u8) -> u16 {
     const REG_ADDR_OFFSET: u16 = 2;
-    ((reg_addr & 0b00011111) as u16) << REG_ADDR_OFFSET
+    const REG_ADDR_MAX: u8 = 0b00011111;
+    assert!(
+        reg_addr <= REG_ADDR_MAX,
+        "clause 22 MIIM has a maximum register address value of {:#010b}",
+        REG_ADDR_MAX
+    );
+    ((reg_addr & REG_ADDR_MAX) as u16) << REG_ADDR_OFFSET
 }
 
 /// Given the PHY and register addresses, produce the control bits for an MDIO read operation.
+#[inline]
 pub fn read_ctrl_bits(phy_addr: u8, reg_addr: u8) -> u16 {
     const READ_CTRL_BITS: u16 = 0b0110_00000_00000_00;
     READ_CTRL_BITS | phy_addr_ctrl_bits(phy_addr) | reg_addr_ctrl_bits(reg_addr)
 }
 
 /// Given the PHY and register addresses, produce the control bits for an MDIO write operation.
+#[inline]
 pub fn write_ctrl_bits(phy_addr: u8, reg_addr: u8) -> u16 {
     const WRITE_CTRL_BITS: u16 = 0b0101_00000_00000_10;
     WRITE_CTRL_BITS | phy_addr_ctrl_bits(phy_addr) | reg_addr_ctrl_bits(reg_addr)
